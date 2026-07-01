@@ -1,0 +1,26 @@
+{
+  "displayName": "TeleNova Support Assistant",
+  "defaultLanguageCode": "en",
+  "timeZone": "America/Los_Angeles",
+  "description": "AI-powered customer support agent for TeleNova telecom services",
+  "enableStackdriverLogging": true,
+  "enableSpellCorrection": true,
+  "speechToTextSettings": {
+    "enableSpeechAdaptation": true
+  },
+  "startFlow": "00000000-0000-0000-0000-000000000000",
+  "advancedSettings": {
+    "audioExportGcsDestination": {},
+    "speechSettings": {
+      "endpointerSensitivity": 100,
+      "noSpeechTimeout": "5s"
+    },
+    "dtmfSettings": {
+      "enabled": false
+    },
+    "loggingSettings": {
+      "enableStackdriverLogging": true,
+      "enableInteractionLogging": true
+    }
+  }
+}

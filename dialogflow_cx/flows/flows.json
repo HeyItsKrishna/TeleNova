@@ -1,0 +1,247 @@
+{
+  "flows": [
+    {
+      "name": "Default Start Flow",
+      "displayName": "Default Start Flow",
+      "description": "Entry point for all customer conversations",
+      "transitionRoutes": [
+        {
+          "intent": "general.support",
+          "triggerFulfillment": {
+            "messages": [
+              {
+                "text": {
+                  "text": ["Welcome to TeleNova support! I'm Nova, your AI assistant. How can I help you today? I can assist with billing, network issues, plan upgrades, account questions, or ticket status."]
+                }
+              }
+            ]
+          },
+          "targetPage": "support_router"
+        }
+      ],
+      "eventHandlers": [
+        {
+          "event": "sys.no-match-default",
+          "triggerFulfillment": {
+            "messages": [
+              {
+                "text": {
+                  "text": ["I didn't quite understand that. Could you rephrase? I can help with billing, network issues, account information, plan changes, or ticket status."]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "event": "sys.no-input-default",
+          "triggerFulfillment": {
+            "messages": [
+              {
+                "text": {
+                  "text": ["Are you still there? I'm here to help whenever you're ready."]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Billing Flow",
+      "displayName": "Billing Flow",
+      "description": "Handles all billing-related conversations",
+      "pages": [
+        {
+          "name": "billing_verification",
+          "displayName": "Account Verification",
+          "entryFulfillment": {
+            "messages": [
+              {
+                "text": {
+                  "text": ["I'll be happy to help with your billing concern. To access your account, could you please provide your account number? It starts with TN- followed by 6 digits."]
+                }
+              }
+            ]
+          },
+          "form": {
+            "parameters": [
+              {
+                "displayName": "account_number",
+                "entityType": "@account_number",
+                "required": true,
+                "fillBehavior": {
+                  "initialPromptFulfillment": {
+                    "messages": [{"text": {"text": ["Please provide your TeleNova account number (format: TN-XXXXXX)."]}}]
+                  },
+                  "repromptEventHandlers": [
+                    {
+                      "event": "sys.no-match-1",
+                      "triggerFulfillment": {
+                        "messages": [{"text": {"text": ["I didn't catch that. Your account number is in the format TN-XXXXXX, which you can find on your bill or in the TeleNova app."]}}]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "transitionRoutes": [
+            {
+              "condition": "$page.params.status = 'FINAL'",
+              "triggerFulfillment": {
+                "webhook": "telanova-webhook",
+                "tag": "billing_detail",
+                "messages": []
+              },
+              "targetPage": "billing_resolution"
+            }
+          ]
+        },
+        {
+          "name": "billing_resolution",
+          "displayName": "Billing Resolution",
+          "entryFulfillment": {
+            "webhook": "telanova-webhook",
+            "tag": "billing_inquiry"
+          },
+          "transitionRoutes": [
+            {
+              "intent": "escalation.request",
+              "targetFlow": "Escalation Flow"
+            },
+            {
+              "condition": "true",
+              "targetPage": "END_SESSION"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Network Flow",
+      "displayName": "Network Troubleshooting Flow",
+      "description": "Guided troubleshooting for network and connectivity issues",
+      "pages": [
+        {
+          "name": "network_info_collection",
+          "displayName": "Collect Network Issue Info",
+          "entryFulfillment": {
+            "messages": [
+              {
+                "text": {
+                  "text": ["I'm sorry you're having network trouble. Let me check if there are any known issues in your area. What's your ZIP code?"]
+                }
+              }
+            ]
+          },
+          "form": {
+            "parameters": [
+              {
+                "displayName": "zip_code",
+                "entityType": "@sys.zip-code",
+                "required": true,
+                "fillBehavior": {
+                  "initialPromptFulfillment": {
+                    "messages": [{"text": {"text": ["Please share your ZIP code so I can check for local outages."]}}]
+                  }
+                }
+              }
+            ]
+          },
+          "transitionRoutes": [
+            {
+              "condition": "$page.params.status = 'FINAL'",
+              "triggerFulfillment": {
+                "webhook": "telanova-webhook",
+                "tag": "check_outage"
+              },
+              "targetPage": "network_troubleshooting"
+            }
+          ]
+        },
+        {
+          "name": "network_troubleshooting",
+          "displayName": "Network Troubleshooting Steps",
+          "entryFulfillment": {
+            "webhook": "telanova-webhook",
+            "tag": "network_issue"
+          },
+          "transitionRoutes": [
+            {
+              "intent": "escalation.request",
+              "targetFlow": "Escalation Flow"
+            },
+            {
+              "condition": "true",
+              "targetPage": "END_SESSION"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Escalation Flow",
+      "displayName": "Escalation Flow",
+      "description": "Handles customer escalation requests to human agents",
+      "pages": [
+        {
+          "name": "escalation_assessment",
+          "displayName": "Assess Escalation",
+          "entryFulfillment": {
+            "webhook": "telanova-webhook",
+            "tag": "escalation_request",
+            "messages": [
+              {
+                "text": {
+                  "text": ["I completely understand, and I want to make sure you get the right help. Let me connect you with a specialist who can resolve this for you."]
+                }
+              }
+            ]
+          },
+          "transitionRoutes": [
+            {
+              "condition": "true",
+              "targetPage": "live_agent_handoff"
+            }
+          ]
+        },
+        {
+          "name": "live_agent_handoff",
+          "displayName": "Live Agent Handoff",
+          "entryFulfillment": {
+            "messages": [
+              {
+                "text": {
+                  "text": ["I'm transferring you now. A TeleNova specialist has your full conversation history and will be ready to help. Your estimated wait time is under 5 minutes. Thank you for your patience."]
+                }
+              }
+            ],
+            "setParameterActions": [
+              {
+                "parameter": "handoff_initiated",
+                "value": true
+              }
+            ]
+          },
+          "transitionRoutes": [
+            {
+              "condition": "true",
+              "targetPage": "END_FLOW"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "webhook": {
+    "displayName": "telanova-webhook",
+    "genericWebService": {
+      "uri": "https://YOUR_CLOUD_RUN_URL/webhook",
+      "httpMethod": "POST",
+      "requestHeaders": {
+        "Content-Type": "application/json"
+      },
+      "timeout": "10s"
+    }
+  }
+}

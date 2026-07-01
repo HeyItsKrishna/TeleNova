@@ -1,0 +1,187 @@
+{
+  "intents": [
+    {
+      "name": "billing_inquiry",
+      "displayName": "billing.inquiry",
+      "trainingPhrases": [
+        {"parts": [{"text": "I have a question about my bill"}]},
+        {"parts": [{"text": "Can you explain my charges?"}]},
+        {"parts": [{"text": "Why is my bill so high this month?"}]},
+        {"parts": [{"text": "I don't understand my statement"}]},
+        {"parts": [{"text": "What are these extra charges on my account?"}]},
+        {"parts": [{"text": "My bill looks different than usual"}]},
+        {"parts": [{"text": "Can I see a breakdown of my bill?"}]},
+        {"parts": [{"text": "What is the regulatory recovery fee?"}]},
+        {"parts": [{"text": "Why am I being charged for international calls?"}]},
+        {"parts": [{"text": "I need help understanding my invoice"}]},
+        {"parts": [{"text": "What does this charge mean on my account?"}]},
+        {"parts": [{"text": "Show me my current balance"}]},
+        {"parts": [{"text": "When is my next payment due?"}]}
+      ],
+      "parameters": []
+    },
+    {
+      "name": "billing_dispute",
+      "displayName": "billing.dispute",
+      "trainingPhrases": [
+        {"parts": [{"text": "I was charged incorrectly"}]},
+        {"parts": [{"text": "There's a wrong charge on my bill"}]},
+        {"parts": [{"text": "I want to dispute a charge"}]},
+        {"parts": [{"text": "I didn't authorize this charge"}]},
+        {"parts": [{"text": "Can I get a refund?"}]},
+        {"parts": [{"text": "I was overcharged this month"}]},
+        {"parts": [{"text": "Remove this incorrect charge from my bill"}]},
+        {"parts": [{"text": "I never signed up for this add-on"}]},
+        {"parts": [{"text": "I was charged twice for the same thing"}]},
+        {"parts": [{"text": "This charge shouldn't be on my account"}]}
+      ],
+      "parameters": [
+        {
+          "id": "charge_amount",
+          "entityType": "@sys.currency-name",
+          "displayName": "charge_amount",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "plan_upgrade",
+      "displayName": "plan.upgrade",
+      "trainingPhrases": [
+        {"parts": [{"text": "I want to upgrade my plan"}]},
+        {"parts": [{"text": "Can I switch to a better plan?"}]},
+        {"parts": [{"text": "Tell me about the Unlimited Pro plan"}]},
+        {"parts": [{"text": "I need more data on my plan"}]},
+        {"parts": [{"text": "What plans do you offer?"}]},
+        {"parts": [{"text": "I want to upgrade to get more hotspot"}]},
+        {"parts": [{"text": "Compare your plans for me"}]},
+        {"parts": [{"text": "What is the difference between Connect and Unlimited Pro?"}]},
+        {"parts": [{"text": "How much does it cost to get unlimited data?"}]},
+        {"parts": [{"text": "I want to add Netflix to my plan"}]},
+        {"parts": [{"text": "Do you have family plans?"}]},
+        {"parts": [{"text": "How do I add a line to my account?"}]}
+      ],
+      "parameters": [
+        {
+          "id": "plan_name",
+          "entityType": "@plan_type",
+          "displayName": "plan_name",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "network_issue",
+      "displayName": "network.issue",
+      "trainingPhrases": [
+        {"parts": [{"text": "I have no signal"}]},
+        {"parts": [{"text": "My calls keep dropping"}]},
+        {"parts": [{"text": "I can't connect to the internet"}]},
+        {"parts": [{"text": "Is there an outage in my area?"}]},
+        {"parts": [{"text": "My data is not working"}]},
+        {"parts": [{"text": "I'm getting very slow internet speeds"}]},
+        {"parts": [{"text": "My phone says no service"}]},
+        {"parts": [{"text": "I can't make calls from my location"}]},
+        {"parts": [{"text": "My LTE is not working"}]},
+        {"parts": [{"text": "5G isn't connecting"}]},
+        {"parts": [{"text": "There's a network problem in my neighborhood"}]},
+        {"parts": [{"text": "I keep losing signal"}]}
+      ],
+      "parameters": [
+        {
+          "id": "zip_code",
+          "entityType": "@sys.zip-code",
+          "displayName": "zip_code",
+          "required": false
+        },
+        {
+          "id": "issue_type",
+          "entityType": "@network_issue_type",
+          "displayName": "issue_type",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "ticket_status",
+      "displayName": "ticket.status",
+      "trainingPhrases": [
+        {"parts": [{"text": "What is the status of my ticket?"}]},
+        {"parts": [{"text": "I want to check my complaint"}]},
+        {"parts": [{"text": "Can you look up my case?"}]},
+        {"parts": [{"text": "What's happening with my open ticket?"}]},
+        {"parts": [{"text": "Check status of BIL-78231"}]},
+        {"parts": [{"text": "I submitted a complaint last week"}]},
+        {"parts": [{"text": "Has my issue been resolved?"}]},
+        {"parts": [{"text": "My ticket number is NET-45901"}]},
+        {"parts": [{"text": "When will my case be resolved?"}]},
+        {"parts": [{"text": "Give me an update on my open case"}]}
+      ],
+      "parameters": [
+        {
+          "id": "ticket_id",
+          "entityType": "@ticket_id",
+          "displayName": "ticket_id",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "escalation_request",
+      "displayName": "escalation.request",
+      "trainingPhrases": [
+        {"parts": [{"text": "I want to speak to a human agent"}]},
+        {"parts": [{"text": "Can I talk to a real person?"}]},
+        {"parts": [{"text": "Transfer me to a supervisor"}]},
+        {"parts": [{"text": "I need to speak to a manager"}]},
+        {"parts": [{"text": "The AI can't help me, I need a person"}]},
+        {"parts": [{"text": "I demand to speak with someone in charge"}]},
+        {"parts": [{"text": "Please escalate this issue"}]},
+        {"parts": [{"text": "Connect me with a live agent"}]},
+        {"parts": [{"text": "I'm not satisfied with this response"}]},
+        {"parts": [{"text": "I want human support"}]},
+        {"parts": [{"text": "This is unacceptable, get me a manager"}]}
+      ],
+      "parameters": []
+    },
+    {
+      "name": "account_information",
+      "displayName": "account.information",
+      "trainingPhrases": [
+        {"parts": [{"text": "What plan am I on?"}]},
+        {"parts": [{"text": "Check my account details"}]},
+        {"parts": [{"text": "How much data have I used?"}]},
+        {"parts": [{"text": "What is my account number?"}]},
+        {"parts": [{"text": "Show me my account information"}]},
+        {"parts": [{"text": "How many lines do I have?"}]},
+        {"parts": [{"text": "When does my billing cycle end?"}]},
+        {"parts": [{"text": "What are my current plan features?"}]},
+        {"parts": [{"text": "Is my account in good standing?"}]},
+        {"parts": [{"text": "My account status"}]}
+      ],
+      "parameters": [
+        {
+          "id": "account_number",
+          "entityType": "@account_number",
+          "displayName": "account_number",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "general_support",
+      "displayName": "general.support",
+      "trainingPhrases": [
+        {"parts": [{"text": "I need help"}]},
+        {"parts": [{"text": "Can you assist me?"}]},
+        {"parts": [{"text": "I have a question"}]},
+        {"parts": [{"text": "Hello"}]},
+        {"parts": [{"text": "Hi there"}]},
+        {"parts": [{"text": "Good morning"}]},
+        {"parts": [{"text": "What can you help me with?"}]},
+        {"parts": [{"text": "Support please"}]}
+      ],
+      "parameters": []
+    }
+  ]
+}

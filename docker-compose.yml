@@ -1,0 +1,24 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: telenova-postgres
+    environment:
+      POSTGRES_USER: telenova
+      POSTGRES_PASSWORD: telenova_dev
+      POSTGRES_DB: telenova
+    ports:
+      - "5432:5432"
+    volumes:
+      - telenova_pg_data:/var/lib/postgresql/data
+      - ./app/db/migrations/001_core_schema.sql:/docker-entrypoint-initdb.d/01_core_schema.sql
+      - ./app/db/migrations/002_seed_data.sql:/docker-entrypoint-initdb.d/02_seed_data.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U telenova -d telenova"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  telenova_pg_data:

@@ -1,0 +1,176 @@
+# ===========================
+# Python
+# ===========================
+
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+.Python
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+
+# Packaging
+build/
+dist/
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+share/python-wheels/
+pip-wheel-metadata/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# ===========================
+# Environment Variables
+# ===========================
+
+.env
+.env.*
+!.env.example
+
+# ===========================
+# Secrets
+# ===========================
+
+service-account.json
+*.json.key
+*.pem
+*.key
+*.p12
+credentials.json
+
+# ===========================
+# Logs
+# ===========================
+
+*.log
+logs/
+
+# ===========================
+# Testing
+# ===========================
+
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+# ===========================
+# Type Checking
+# ===========================
+
+.mypy_cache/
+.pyre/
+.pytype/
+
+# ===========================
+# Ruff / Lint
+# ===========================
+
+.ruff_cache/
+
+# ===========================
+# IDEs
+# ===========================
+
+.vscode/
+.idea/
+
+# ===========================
+# Operating System
+# ===========================
+
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===========================
+# Databases
+# ===========================
+
+*.sqlite
+*.sqlite3
+*.db
+
+# ===========================
+# ChromaDB
+# ===========================
+
+chroma_db/
+chroma/
+.vectorstore/
+
+# ===========================
+# Temporary Files
+# ===========================
+
+tmp/
+temp/
+.cache/
+
+# ===========================
+# Git
+# ===========================
+
+.git/
+
+# ===========================
+# Cloud Build
+# ===========================
+
+.cloudbuild/
+
+# ===========================
+# Docker
+# ===========================
+
+*.tar
+
+# ===========================
+# Jupyter
+# ===========================
+
+.ipynb_checkpoints/
+
+# ===========================
+# Local TeleNova Files
+# ===========================
+
+alloydb-data/
+postgres-data/
+
+# Docker volumes
+pgdata/
+
+# Runtime artifacts
+uploads/
+downloads/
+
+# ===========================
+# Keep these in Git
+# ===========================
+
+!.env.example
+!README.md
+!Dockerfile
+!docker-compose.yml
+!requirements.txt
+!deployment/
+!docs/
+!knowledge_base/
+!dialogflow_cx/
+!tests/
+!app/

@@ -1,0 +1,95 @@
+{
+  "entities": [
+    {
+      "name": "plan_type",
+      "displayName": "plan_type",
+      "kind": "KIND_MAP",
+      "entities": [
+        {
+          "value": "starter",
+          "synonyms": ["starter", "starter plan", "basic", "basic plan", "cheapest plan", "entry level"]
+        },
+        {
+          "value": "connect",
+          "synonyms": ["connect", "connect plan", "standard", "standard plan", "middle plan", "25GB plan"]
+        },
+        {
+          "value": "unlimited_pro",
+          "synonyms": ["unlimited pro", "unlimited", "pro plan", "premium", "premium plan", "top plan", "best plan", "unlimited data"]
+        },
+        {
+          "value": "business_pro",
+          "synonyms": ["business pro", "business", "business plan", "enterprise", "corporate plan"]
+        }
+      ]
+    },
+    {
+      "name": "network_issue_type",
+      "displayName": "network_issue_type",
+      "kind": "KIND_MAP",
+      "entities": [
+        {
+          "value": "no_signal",
+          "synonyms": ["no signal", "no service", "no coverage", "dead zone", "can't connect"]
+        },
+        {
+          "value": "slow_data",
+          "synonyms": ["slow internet", "slow data", "slow speeds", "buffering", "loading slow", "sluggish"]
+        },
+        {
+          "value": "call_dropping",
+          "synonyms": ["calls dropping", "call drops", "dropped calls", "lost call", "disconnected"]
+        },
+        {
+          "value": "mms_issue",
+          "synonyms": ["can't send pictures", "MMS not working", "multimedia message", "picture message"]
+        },
+        {
+          "value": "roaming_issue",
+          "synonyms": ["roaming not working", "no international service", "abroad", "traveling"]
+        }
+      ]
+    },
+    {
+      "name": "ticket_id",
+      "displayName": "ticket_id",
+      "kind": "KIND_REGEXP",
+      "entities": [
+        {
+          "value": "ticket_pattern",
+          "synonyms": ["(BIL|NET|ACC|DEV|GEN)-[0-9]{5}"]
+        }
+      ]
+    },
+    {
+      "name": "account_number",
+      "displayName": "account_number",
+      "kind": "KIND_REGEXP",
+      "entities": [
+        {
+          "value": "account_pattern",
+          "synonyms": ["TN-[0-9]{6}"]
+        }
+      ]
+    },
+    {
+      "name": "issue_severity",
+      "displayName": "issue_severity",
+      "kind": "KIND_MAP",
+      "entities": [
+        {
+          "value": "critical",
+          "synonyms": ["urgent", "emergency", "critical", "immediately", "right now", "asap"]
+        },
+        {
+          "value": "high",
+          "synonyms": ["important", "serious", "major", "significant"]
+        },
+        {
+          "value": "normal",
+          "synonyms": ["normal", "regular", "standard", "when you can"]
+        }
+      ]
+    }
+  ]
+}
