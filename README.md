@@ -331,34 +331,4 @@ After deployment, update your Dialogflow CX agent:
 3. Set timeout: 10 seconds
 4. Assign webhook to fulfillment in relevant flow pages
 
----
 
-## Resume Bullet Examples
-
-- Designed and deployed a **Dialogflow CX + Gemini AI customer support system** for a telecom use case, automating billing, network, and account inquiries with multi-turn context retention and slot filling across 8 intents and 4 conversation flows
-
-- Built a **RAG pipeline** using ChromaDB (text-embedding-004) and Gemini 2.5 Flash to ground AI responses in a 5-document private knowledge base, reducing hallucination and improving answer relevance for support queries
-
-- Implemented a **Google ADK multi-agent architecture** with 4 specialized agents (Support, Billing, Network, Escalation), each equipped with domain-specific tools for account lookup, diagnostic triggering, and automated credit application
-
-- Developed a **FastAPI webhook backend** deployed on **Cloud Run** (auto-scaling 1–10 instances) serving Dialogflow CX fulfillment with full observability including per-request latency, token counts, and cost estimation
-
-- Implemented **session-aware conversation state management** persisting 10-turn history, active intent, and extracted parameters (account number, ticket ID) across multi-turn customer interactions
-
----
-
-## Interview Talking Points
-
-1. **Why Dialogflow CX over ES?** CX provides page/flow-based state machines better suited for complex, multi-step conversations like support flows with slot filling and conditional routing.
-
-2. **Why RAG over fine-tuning?** Knowledge base content (billing rates, plan details, SOPs) changes frequently. RAG allows real-time knowledge updates without retraining, and provides source attribution.
-
-3. **Why ADK multi-agent over a single agent?** Domain specialization improves tool relevance and reduces context window pressure. The orchestrator routes to the right agent based on intent.
-
-4. **How does session management work?** In-memory `SessionStore` tracks `UserSession` objects keyed by UUID, with TTL expiry. Conversation history is trimmed to the last 10 turns for prompt efficiency.
-
-5. **How would you scale this?** Replace in-memory session store with Redis (Memorystore), add Pub/Sub for async processing, use Vertex AI Vector Search instead of ChromaDB for scale, add Cloud Armor for rate limiting.
-
----
-
-*Built by [Your Name] | Targeting: Google Cloud Conversational AI Consultant*
