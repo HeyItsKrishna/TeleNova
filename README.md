@@ -1,115 +1,129 @@
 # TeleNova
 
+::: {align="center"}
 ## Enterprise AI-Powered Telecom Customer Support Platform on Google Cloud
 
-TeleNova is a cloud-native conversational AI platform designed for
-telecom customer support. It combines FastAPI, Dialogflow CX, Gemini 2.5
-Flash, Vertex AI Vector Search, and AlloyDB to provide grounded,
-context-aware customer assistance through a modular multi-agent
-architecture.
+TeleNova is a cloud-native conversational AI platform that modernizes
+telecom customer support through a combination of Retrieval-Augmented
+Generation (RAG), a modular multi-agent architecture, and managed Google
+Cloud services.
+
+It is designed to deliver grounded, context-aware responses for billing,
+network, account, and general support requests while remaining scalable,
+maintainable, and production-oriented.
+:::
 
 ------------------------------------------------------------------------
 
-# Table of Contents
+## Table of Contents
 
-1.  Overview
-2.  Problem Statement
-3.  Solution Overview
-4.  Key Features
-5.  System Architecture
-6.  Google Cloud Architecture
-7.  Multi-Agent Design
-8.  RAG Pipeline
-9.  Repository Structure
-10. Database Design
-11. Technology Stack
-12. API Overview
-13. Configuration
-14. Local Development
-15. Deployment
-16. Testing
-17. Roadmap
-18. License
-19. Author
+-   Overview
+-   Why TeleNova?
+-   Features
+-   System Architecture
+-   Google Cloud Architecture
+-   Multi-Agent Architecture
+-   Retrieval-Augmented Generation Pipeline
+-   Repository Structure
+-   Database Design
+-   Technology Stack
+-   API Overview
+-   Configuration
+-   Local Development
+-   Deployment
+-   Testing
+-   Security Considerations
+-   Future Roadmap
+-   License
+-   Author
 
 ------------------------------------------------------------------------
 
 # Overview
 
-TeleNova addresses common telecom support challenges such as billing
-inquiries, network troubleshooting, plan recommendations, and account
-assistance. Rather than relying solely on an LLM, the platform retrieves
-verified knowledge using Retrieval-Augmented Generation (RAG) before
-generating responses, reducing hallucinations and improving consistency.
+TeleNova combines FastAPI, Dialogflow CX, Gemini 2.5 Flash, Vertex AI
+Vector Search, and AlloyDB into a single conversational platform.
+
+Instead of relying exclusively on a language model, TeleNova retrieves
+relevant knowledge from a curated knowledge base before response
+generation. This grounding process helps produce responses that are more
+consistent, explainable, and aligned with enterprise documentation.
 
 ------------------------------------------------------------------------
 
-# Problem Statement
+# Why TeleNova?
 
-Traditional telecom support systems often suffer from:
+Telecom support organizations routinely handle:
 
--   Long wait times
--   Repetitive manual troubleshooting
--   Fragmented knowledge bases
--   Inconsistent customer experiences
+-   Billing disputes
+-   Plan comparisons
+-   Network troubleshooting
+-   Account management
+-   Escalation requests
 
-TeleNova combines semantic retrieval with large language models to
-improve response quality while keeping the architecture modular and
-cloud-native.
+These requests often require searching multiple internal knowledge
+sources before an accurate answer can be produced.
+
+TeleNova addresses this by combining semantic retrieval with specialized
+AI agents that can route requests, retrieve verified knowledge, and
+generate grounded responses.
 
 ------------------------------------------------------------------------
 
-# Key Features
+# Features
 
--   Multi-agent orchestration
--   Intent-aware routing
--   Retrieval-Augmented Generation
--   Gemini 2.5 Flash
--   Vertex AI Vector Search
+-   Intent-aware request routing
+-   Modular multi-agent architecture
+-   Retrieval-Augmented Generation (RAG)
+-   Gemini 2.5 Flash response generation
+-   Vertex AI Vector Search semantic retrieval
 -   AlloyDB metadata storage
 -   Dialogflow CX integration
--   FastAPI backend
+-   FastAPI REST backend
 -   Structured logging
--   SQL-based database migrations
+-   SQL migration workflow
+-   Cloud-native deployment
 
 ------------------------------------------------------------------------
 
 # System Architecture
 
 ``` text
-User
- │
- ▼
-Dialogflow CX
- │
- ▼
-FastAPI
- │
- ▼
-Intent Classification
- │
- ▼
-Orchestrator
- │
- ├── Billing Agent
- ├── Network Agent
- ├── Support Agent
- ├── Knowledge Agent
- └── Escalation Agent
- │
- ▼
-RAG Pipeline
- │
- ├── Embed Query
- ├── Vertex AI Vector Search
- ├── Retrieve Metadata (AlloyDB)
- └── Construct Grounded Prompt
- │
- ▼
-Gemini 2.5 Flash
- │
- ▼
-Grounded Response
+                    User
+                      │
+                      ▼
+               Dialogflow CX
+                      │
+                      ▼
+                FastAPI Backend
+                      │
+                      ▼
+             Intent Classification
+                      │
+                      ▼
+                 Orchestrator
+                      │
+      ┌───────────────┼────────────────┐
+      ▼               ▼                ▼
+ Billing Agent   Network Agent   Support Agent
+      │               │                │
+      └───────────────┼────────────────┘
+                      ▼
+                Knowledge Agent
+                      │
+                      ▼
+               Retrieval Pipeline
+                      │
+      ┌───────────────┼────────────────┐
+      ▼               ▼                ▼
+ Query Embedding  Vector Search   Metadata Lookup
+      │               │                │
+      └───────────────┼────────────────┘
+                      ▼
+              Gemini 2.5 Flash
+                      │
+                      ▼
+               Grounded Response
 ```
 
 ------------------------------------------------------------------------
@@ -117,43 +131,76 @@ Grounded Response
 # Google Cloud Architecture
 
   Service                   Responsibility
-  ------------------------- ------------------------------------
-  Dialogflow CX             Conversation entry point
-  Cloud Run                 FastAPI hosting
-  Gemini 2.5 Flash          Response generation
-  Vertex AI Vector Search   Semantic retrieval
-  AlloyDB                   Operational and knowledge metadata
-  Cloud Storage             Knowledge assets
+  ------------------------- -------------------------------------------------
+  Dialogflow CX             Conversation entry point and session management
+  Gemini 2.5 Flash          Natural language generation
+  Vertex AI Vector Search   Semantic nearest-neighbor retrieval
+  AlloyDB for PostgreSQL    Customer records and knowledge metadata
+  Cloud Storage             Knowledge base assets
+  Cloud Run                 Backend deployment
   Cloud Build               Container build pipeline
 
 ------------------------------------------------------------------------
 
-# Multi-Agent Design
+# Multi-Agent Architecture
 
-The orchestrator routes incoming requests to specialized agents based on
-detected intent.
+TeleNova follows an orchestration pattern where incoming requests are
+classified and routed to specialized agents.
 
-  Agent        Responsibility
-  ------------ ----------------------------------
-  Billing      Billing and payment inquiries
-  Network      Connectivity and troubleshooting
-  Support      General customer assistance
-  Knowledge    RAG retrieval and grounding
-  Escalation   Human handoff workflows
+  Agent              Purpose
+  ------------------ --------------------------------
+  Billing Agent      Billing and payment assistance
+  Network Agent      Connectivity troubleshooting
+  Support Agent      General support requests
+  Knowledge Agent    Retrieval and grounding
+  Escalation Agent   Human escalation workflows
+
+This modular approach allows responsibilities to remain isolated and
+simplifies future expansion.
 
 ------------------------------------------------------------------------
 
-# Retrieval-Augmented Generation
+# Retrieval-Augmented Generation Pipeline
 
-1.  Markdown knowledge is loaded.
+``` text
+Markdown Knowledge Base
+          │
+          ▼
+Document Chunking
+          │
+          ▼
+gemini-embedding-001
+          │
+          ▼
+Vertex AI Vector Search
+          │
+          ▼
+Nearest Neighbor Retrieval
+          │
+          ▼
+AlloyDB Metadata Lookup
+          │
+          ▼
+Grounded Prompt Construction
+          │
+          ▼
+Gemini 2.5 Flash
+          │
+          ▼
+Customer Response
+```
+
+Workflow:
+
+1.  Knowledge documents are loaded.
 2.  Documents are chunked.
-3.  Chunks are embedded using **gemini-embedding-001**.
+3.  Chunks are embedded with `gemini-embedding-001`.
 4.  Embeddings are indexed in Vertex AI Vector Search.
 5.  Metadata is stored in AlloyDB.
-6.  User queries are embedded.
-7.  Relevant chunks are retrieved.
-8.  A grounded prompt is built.
-9.  Gemini generates the final response.
+6.  Incoming queries are embedded.
+7.  Similar knowledge chunks are retrieved.
+8.  Retrieved context is added to the prompt.
+9.  Gemini generates the final grounded response.
 
 ------------------------------------------------------------------------
 
@@ -180,7 +227,7 @@ TeleNova/
 
 # Database Design
 
-Primary tables:
+Core tables include:
 
 -   customers
 -   plans
@@ -191,52 +238,53 @@ Primary tables:
 -   chat_messages
 -   knowledge_chunks
 
-`knowledge_chunks` stores textual metadata while vector embeddings are
-stored in Vertex AI Vector Search.
+`knowledge_chunks` stores textual content and metadata. Embeddings are
+stored separately in Vertex AI Vector Search.
 
 ------------------------------------------------------------------------
 
 # Technology Stack
 
-  Category       Technology
-  -------------- -------------------------
-  Language       Python 3.12
-  Backend        FastAPI
-  LLM            Gemini 2.5 Flash
-  Embeddings     gemini-embedding-001
-  Retrieval      Vertex AI Vector Search
-  Database       AlloyDB for PostgreSQL
-  Conversation   Dialogflow CX
-  Cloud          Google Cloud
-  Containers     Docker
+  Layer                   Technology
+  ----------------------- -------------------------
+  Programming Language    Python 3.12
+  Backend                 FastAPI
+  AI SDK                  Google Gen AI SDK
+  Language Model          Gemini 2.5 Flash
+  Embeddings              gemini-embedding-001
+  Semantic Retrieval      Vertex AI Vector Search
+  Database                AlloyDB for PostgreSQL
+  Conversation Platform   Dialogflow CX
+  Cloud Platform          Google Cloud
+  Containers              Docker
 
 ------------------------------------------------------------------------
 
 # API Overview
 
-Core responsibilities include:
+The backend exposes endpoints for:
 
--   Customer chat endpoint
--   Health endpoint
+-   Health monitoring
+-   Customer conversations
 -   Agent orchestration
 -   Knowledge retrieval
--   Billing and account access
+-   Billing and account operations
 
 ------------------------------------------------------------------------
 
 # Configuration
 
-Populate `.env` from `.env.example` and configure:
+Create a `.env` file from `.env.example` and configure:
 
 -   GOOGLE_CLOUD_PROJECT
 -   GOOGLE_CLOUD_LOCATION
 -   DATABASE_URL
 -   GEMINI_MODEL
 -   DIALOGFLOW_AGENT_ID
+-   GCS_BUCKET_NAME
 -   VERTEX_INDEX_ID
 -   VERTEX_INDEX_ENDPOINT_ID
 -   VERTEX_DEPLOYED_INDEX_ID
--   GCS_BUCKET_NAME
 
 ------------------------------------------------------------------------
 
@@ -260,14 +308,23 @@ uvicorn app.main:app --reload
 
 # Deployment
 
-1.  Provision AlloyDB.
-2.  Provision Vertex AI Vector Search.
-3.  Create Dialogflow CX agent.
-4.  Configure Cloud Storage.
-5.  Build and deploy to Cloud Run.
-6.  Execute SQL migrations.
-7.  Load the knowledge base.
-8.  Validate end-to-end retrieval.
+Provision:
+
+1.  AlloyDB
+2.  Vertex AI Vector Search
+3.  Dialogflow CX
+4.  Cloud Storage
+5.  Cloud Run
+
+Deployment workflow:
+
+1.  Apply SQL migrations.
+2.  Configure environment variables.
+3.  Load the knowledge base.
+4.  Populate the vector index.
+5.  Deploy the API.
+6.  Configure the Dialogflow webhook.
+7.  Validate end-to-end conversations.
 
 ------------------------------------------------------------------------
 
@@ -275,29 +332,41 @@ uvicorn app.main:app --reload
 
 Recommended validation:
 
--   API health check
+-   API health endpoint
 -   Database connectivity
--   Vector retrieval
+-   Knowledge ingestion
+-   Semantic retrieval
 -   RAG grounding
 -   Multi-turn conversations
 -   Dialogflow webhook integration
 
 ------------------------------------------------------------------------
 
-# Roadmap
+# Security Considerations
+
+-   Secrets are managed through environment variables.
+-   `.env` is excluded from version control.
+-   Customer data is stored in AlloyDB.
+-   Vector embeddings are managed by Vertex AI Vector Search.
+-   Sensitive configuration remains outside the repository.
+
+------------------------------------------------------------------------
+
+# Future Roadmap
 
 -   Hybrid lexical and semantic retrieval
 -   Streaming responses
--   Evaluation pipeline
--   Analytics dashboard
+-   Automated evaluation pipeline
+-   Conversation analytics dashboard
 -   Multi-region deployment
 -   Enhanced observability
+-   Agent performance metrics
 
 ------------------------------------------------------------------------
 
 # License
 
-MIT License
+This project is licensed under the MIT License.
 
 ------------------------------------------------------------------------
 
