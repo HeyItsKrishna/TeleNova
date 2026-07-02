@@ -1,5 +1,5 @@
-import google.generativeai as genai
-import os
+from google import genai
+
 from app.config import get_settings
 from app.rag.vector_store import knowledge_base
 from app.utils.observability import get_logger, RequestMetrics
@@ -19,7 +19,8 @@ GUIDELINES:
 - Maintain a warm, professional tone
 - If a customer seems frustrated, acknowledge their frustration before providing information
 
-IMPORTANT: You are NOT a human. If asked, acknowledge you are an AI assistant."""
+IMPORTANT: You are NOT a human. If asked, acknowledge you are an AI assistant.
+"""
 
 GROUNDED_PROMPT_TEMPLATE = """KNOWLEDGE BASE CONTEXT:
 {context}
@@ -27,45 +28,55 @@ GROUNDED_PROMPT_TEMPLATE = """KNOWLEDGE BASE CONTEXT:
 CONVERSATION HISTORY:
 {history}
 
-CUSTOMER MESSAGE: {user_message}
+CUSTOMER MESSAGE:
+{user_message}
 
-Using the knowledge base context provided above, give a helpful, accurate response to the customer. If the context doesn't contain enough information, say so and offer escalation to a human agent.
+INTENT DETECTED:
+{intent}
 
-INTENT DETECTED: {intent}
+Respond using ONLY the provided knowledge base when possible.
+If the knowledge base does not contain enough information,
+say so clearly and offer escalation to a human agent.
 """
 
 
 class RAGPipeline:
     def __init__(self):
-        genai.configure(
-            api_key=os.environ["GOOGLE_API_KEY"]
-        )
-        self._model = genai.GenerativeModel(
-            model_name=settings.gemini_model,
-            system_instruction=SYSTEM_PROMPT,
-            generation_config=genai.GenerationConfig(
-                temperature=settings.gemini_temperature,
-                max_output_tokens=settings.gemini_max_output_tokens,
-                top_p=0.95,
-            ),
+        self._client = genai.Client(
+            vertexai=True,
+            project=settings.google_cloud_project,
+            location=settings.google_cloud_location,
         )
 
     def _format_history(self, history: list[dict]) -> str:
         if not history:
             return "No prior conversation."
+
         formatted = []
+
         for turn in history[-6:]:
             role = "Customer" if turn["role"] == "user" else "Nova"
             formatted.append(f"{role}: {turn['content']}")
+
         return "\n".join(formatted)
 
     def _format_context(self, retrieved_docs: list[dict]) -> str:
         if not retrieved_docs:
             return "No relevant knowledge base content found."
-        parts = []
-        for i, doc in enumerate(retrieved_docs, 1):
-            parts.append(f"[Source {i}: {doc['source']} | Relevance: {doc['relevance_score']}]\n{doc['content']}")
-        return "\n\n---\n\n".join(parts)
+
+        context = []
+
+        for i, doc in enumerate(retrieved_docs, start=1):
+            context.append(
+                f"""[Source {i}]
+Source: {doc["source"]}
+Relevance: {doc["relevance_score"]}
+
+{doc["content"]}
+"""
+            )
+
+        return "\n\n----------------------\n\n".join(context)
 
     async def generate(
         self,
@@ -74,33 +85,48 @@ class RAGPipeline:
         history: list[dict],
         metrics: RequestMetrics,
     ) -> dict:
+
         intent_category = self._map_intent_to_category(intent)
+
         retrieved_docs = knowledge_base.retrieve(
             query=user_message,
             n_results=4,
             intent_filter=intent_category,
         )
 
-        context_text = self._format_context(retrieved_docs)
-        history_text = self._format_history(history)
-
         prompt = GROUNDED_PROMPT_TEMPLATE.format(
-            context=context_text,
-            history=history_text,
+            context=self._format_context(retrieved_docs),
+            history=self._format_history(history),
             user_message=user_message,
             intent=intent,
         )
 
-        response = self._model.generate_content(prompt)
+        full_prompt = f"{SYSTEM_PROMPT}\n\n{prompt}"
 
-        if response.usage_metadata:
-            metrics.record_tokens(
-                input_tokens=response.usage_metadata.prompt_token_count or 0,
-                output_tokens=response.usage_metadata.candidates_token_count or 0,
-            )
+        response = self._client.models.generate_content(
+            model=settings.gemini_model,
+            contents=full_prompt,
+        )
 
         answer = response.text.strip()
-        sources = list({doc["source"] for doc in retrieved_docs})
+
+        try:
+            usage = response.usage_metadata
+
+            metrics.record_tokens(
+                input_tokens=getattr(usage, "prompt_token_count", 0) or 0,
+                output_tokens=getattr(usage, "candidates_token_count", 0) or 0,
+            )
+
+        except Exception:
+            pass
+
+        sources = list(
+            {
+                doc["source"]
+                for doc in retrieved_docs
+            }
+        )
 
         logger.info(
             "rag_generation_complete",
@@ -115,7 +141,7 @@ class RAGPipeline:
             "retrieved_count": len(retrieved_docs),
         }
 
-    def _map_intent_to_category(self, intent: str) -> str:
+    def _map_intent_to_category(self, intent: str) -> str | None:
         mapping = {
             "billing_inquiry": "billing",
             "billing_dispute": "billing",
@@ -131,6 +157,7 @@ class RAGPipeline:
             "account_information": "account",
             "general_support": None,
         }
+
         return mapping.get(intent)
 
 

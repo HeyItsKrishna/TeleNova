@@ -1,6 +1,7 @@
 import asyncpg
 from typing import Optional, Any
 from contextlib import asynccontextmanager
+
 from app.config import get_settings
 from app.utils.observability import get_logger
 
@@ -15,12 +16,14 @@ class Database:
     async def connect(self) -> None:
         if self._pool is not None:
             return
+
         self._pool = await asyncpg.create_pool(
             dsn=settings.database_url,
             min_size=settings.db_pool_min_size,
             max_size=settings.db_pool_max_size,
             command_timeout=settings.db_command_timeout_seconds,
         )
+
         logger.info(
             "database_pool_created",
             min_size=settings.db_pool_min_size,
@@ -43,6 +46,13 @@ class Database:
     async def acquire(self):
         async with self.pool.acquire() as connection:
             yield connection
+
+    # ✅ NEW
+    @asynccontextmanager
+    async def transaction(self):
+        async with self.pool.acquire() as connection:
+            async with connection.transaction():
+                yield connection
 
     async def fetch(self, query: str, *args: Any) -> list[asyncpg.Record]:
         async with self.acquire() as conn:
