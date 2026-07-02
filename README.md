@@ -1,334 +1,306 @@
-# TeleNova AI Support Assistant
+# TeleNova
 
-> A production-grade, cloud-native Conversational AI customer support system built with **Dialogflow CX**, **Gemini 2.5 Flash**, **Google ADK**, and **FastAPI** — deployed on **Google Cloud Run**.
+## Enterprise AI-Powered Telecom Customer Support Platform on Google Cloud
 
----
+TeleNova is a cloud-native conversational AI platform designed for
+telecom customer support. It combines FastAPI, Dialogflow CX, Gemini 2.5
+Flash, Vertex AI Vector Search, and AlloyDB to provide grounded,
+context-aware customer assistance through a modular multi-agent
+architecture.
 
-## Project Overview
+------------------------------------------------------------------------
 
-TeleNova AI Support automates customer service interactions for a fictional telecom company, TeleNova. Customers interact through Dialogflow CX and receive intelligent, context-aware responses grounded in a private knowledge base via a RAG pipeline powered by Gemini.
+# Table of Contents
 
-**This project demonstrates:**
-- Production Dialogflow CX agent design with multi-turn conversation flows
-- Gemini-grounded response generation via RAG (Retrieval-Augmented Generation)
-- Google ADK multi-agent orchestration (Support, Billing, Network, Escalation agents)
-- Context-aware, session-persistent conversations
-- FastAPI webhook backend deployed on Cloud Run
-- Full observability (request_id, intent, latency, token_count, cost estimation)
+1.  Overview
+2.  Problem Statement
+3.  Solution Overview
+4.  Key Features
+5.  System Architecture
+6.  Google Cloud Architecture
+7.  Multi-Agent Design
+8.  RAG Pipeline
+9.  Repository Structure
+10. Database Design
+11. Technology Stack
+12. API Overview
+13. Configuration
+14. Local Development
+15. Deployment
+16. Testing
+17. Roadmap
+18. License
+19. Author
 
----
+------------------------------------------------------------------------
 
-## Business Problem
+# Overview
 
-A telecom company needs to deflect 60–70% of Tier 1 support contacts to an AI system that can:
+TeleNova addresses common telecom support challenges such as billing
+inquiries, network troubleshooting, plan recommendations, and account
+assistance. Rather than relying solely on an LLM, the platform retrieves
+verified knowledge using Retrieval-Augmented Generation (RAG) before
+generating responses, reducing hallucinations and improving consistency.
 
-| Customer Need | System Capability |
-|---|---|
-| Billing questions & disputes | Billing Agent + RAG over billing FAQ |
-| Plan upgrades & comparisons | RAG over plan comparison guide |
-| Network issues & outages | Network Agent + diagnostics |
-| Ticket status lookups | Support Agent with mock CRM |
-| Account information | Account verification + session context |
-| Escalation to human agents | Escalation Agent with warm handoff |
+------------------------------------------------------------------------
 
----
+# Problem Statement
 
-## Architecture
+Traditional telecom support systems often suffer from:
 
+-   Long wait times
+-   Repetitive manual troubleshooting
+-   Fragmented knowledge bases
+-   Inconsistent customer experiences
+
+TeleNova combines semantic retrieval with large language models to
+improve response quality while keeping the architecture modular and
+cloud-native.
+
+------------------------------------------------------------------------
+
+# Key Features
+
+-   Multi-agent orchestration
+-   Intent-aware routing
+-   Retrieval-Augmented Generation
+-   Gemini 2.5 Flash
+-   Vertex AI Vector Search
+-   AlloyDB metadata storage
+-   Dialogflow CX integration
+-   FastAPI backend
+-   Structured logging
+-   SQL-based database migrations
+
+------------------------------------------------------------------------
+
+# System Architecture
+
+``` text
+User
+ │
+ ▼
+Dialogflow CX
+ │
+ ▼
+FastAPI
+ │
+ ▼
+Intent Classification
+ │
+ ▼
+Orchestrator
+ │
+ ├── Billing Agent
+ ├── Network Agent
+ ├── Support Agent
+ ├── Knowledge Agent
+ └── Escalation Agent
+ │
+ ▼
+RAG Pipeline
+ │
+ ├── Embed Query
+ ├── Vertex AI Vector Search
+ ├── Retrieve Metadata (AlloyDB)
+ └── Construct Grounded Prompt
+ │
+ ▼
+Gemini 2.5 Flash
+ │
+ ▼
+Grounded Response
 ```
-Customer (Web / Voice / Chat)
-         │
-         ▼
-  Dialogflow CX Agent
-  ┌─────────────────────────┐
-  │  Intent Detection        │
-  │  Entity Extraction       │
-  │  Flow Routing            │
-  │  Slot Filling            │
-  └────────────┬────────────┘
-               │ Webhook (HTTPS POST)
-               ▼
-  FastAPI Backend (Cloud Run)
-  ┌─────────────────────────────────────┐
-  │  /webhook  ──►  Agent Orchestrator  │
-  │  /chat     ──►  Session Manager     │
-  │  /health   ──►  Status Check        │
-  └────────────┬────────────────────────┘
-               │
-               ▼
-  Google ADK Multi-Agent Layer
-  ┌──────────┐ ┌──────────┐ ┌─────────┐ ┌───────────┐
-  │ Support  │ │ Billing  │ │ Network │ │Escalation │
-  │  Agent   │ │  Agent   │ │  Agent  │ │   Agent   │
-  └────┬─────┘ └────┬─────┘ └────┬────┘ └─────┬─────┘
-       └────────────┴────────────┴─────────────┘
-                         │
-                         ▼
-              RAG Pipeline
-  ┌─────────────────────────────────────┐
-  │  User Query                          │
-  │     ▼                                │
-  │  ChromaDB Vector Store               │
-  │  (text-embedding-004)                │
-  │     ▼                                │
-  │  Top-K Relevant Chunks               │
-  │     ▼                                │
-  │  Gemini 2.5 Flash (Grounded)         │
-  │     ▼                                │
-  │  Structured Response                 │
-  └─────────────────────────────────────┘
-               │
-               ▼
-  Knowledge Base (GCS + ChromaDB)
-  ┌────────────────────────────┐
-  │  billing_faq.md            │
-  │  network_troubleshooting.md│
-  │  plan_comparison.md        │
-  │  escalation_sop.md         │
-  │  customer_support_handbook │
-  └────────────────────────────┘
-```
 
----
+------------------------------------------------------------------------
 
-## Project Structure
+# Google Cloud Architecture
 
-```
-telecom-support-ai/
+  Service                   Responsibility
+  ------------------------- ------------------------------------
+  Dialogflow CX             Conversation entry point
+  Cloud Run                 FastAPI hosting
+  Gemini 2.5 Flash          Response generation
+  Vertex AI Vector Search   Semantic retrieval
+  AlloyDB                   Operational and knowledge metadata
+  Cloud Storage             Knowledge assets
+  Cloud Build               Container build pipeline
+
+------------------------------------------------------------------------
+
+# Multi-Agent Design
+
+The orchestrator routes incoming requests to specialized agents based on
+detected intent.
+
+  Agent        Responsibility
+  ------------ ----------------------------------
+  Billing      Billing and payment inquiries
+  Network      Connectivity and troubleshooting
+  Support      General customer assistance
+  Knowledge    RAG retrieval and grounding
+  Escalation   Human handoff workflows
+
+------------------------------------------------------------------------
+
+# Retrieval-Augmented Generation
+
+1.  Markdown knowledge is loaded.
+2.  Documents are chunked.
+3.  Chunks are embedded using **gemini-embedding-001**.
+4.  Embeddings are indexed in Vertex AI Vector Search.
+5.  Metadata is stored in AlloyDB.
+6.  User queries are embedded.
+7.  Relevant chunks are retrieved.
+8.  A grounded prompt is built.
+9.  Gemini generates the final response.
+
+------------------------------------------------------------------------
+
+# Repository Structure
+
+``` text
+TeleNova/
 ├── app/
 │   ├── agents/
-│   │   ├── support_agent.py        # Primary ADK agent (ticket, account, data tools)
-│   │   ├── billing_agent.py        # Billing ADK agent (charges, credits, history)
-│   │   ├── network_agent.py        # Network ADK agent (outages, diagnostics, reset)
-│   │   ├── escalation_agent.py     # Escalation ADK agent (priority, handoff, goodwill)
-│   │   └── orchestrator.py         # Intent router → agent selector
 │   ├── api/
-│   │   ├── models.py               # Pydantic request/response models
-│   │   └── routes.py               # FastAPI endpoints (/chat, /webhook, /health)
+│   ├── db/
 │   ├── rag/
-│   │   ├── vector_store.py         # ChromaDB loader + retrieval
-│   │   └── pipeline.py             # Gemini grounded generation
-│   ├── utils/
-│   │   ├── session.py              # Session + conversation state management
-│   │   └── observability.py        # Structured logging + request metrics
-│   └── config.py                   # Pydantic settings from environment
+│   └── utils/
+├── database/
+│   └── migrations/
 ├── knowledge_base/
-│   ├── billing_faq.md
-│   ├── network_troubleshooting.md
-│   ├── plan_comparison.md
-│   ├── escalation_sop.md
-│   └── customer_support_handbook.md
-├── dialogflow_cx/
-│   ├── agent.json                  # Agent-level configuration
-│   ├── intents/intents.json        # All intents + training phrases
-│   ├── entities/entities.json      # Custom entities (plan_type, ticket_id, etc.)
-│   └── flows/flows.json            # Flows, pages, routes, webhook config
-├── deployment/
-│   ├── deploy.sh                   # Cloud Run deployment script
-│   └── setup_local.sh              # Local development setup
-├── docs/
-│   ├── INTERVIEW_HANDBOOK.md
-│   └── INTERVIEW_QUESTIONS.md
-├── main.py                         # Application entrypoint
+├── tests/
 ├── Dockerfile
 ├── requirements.txt
-├── .env.example
-└── README.md
+└── .env.example
 ```
 
----
+------------------------------------------------------------------------
 
-## Dialogflow CX Design
+# Database Design
 
-### Intent Hierarchy
+Primary tables:
 
-| Intent Display Name | Category | Key Parameters |
-|---|---|---|
-| `general.support` | Entry | — |
-| `billing.inquiry` | Billing | — |
-| `billing.dispute` | Billing | `charge_amount` |
-| `plan.upgrade` | Plan | `plan_name` |
-| `network.issue` | Network | `zip_code`, `issue_type` |
-| `ticket.status` | Account | `ticket_id` |
-| `escalation.request` | Escalation | — |
-| `account.information` | Account | `account_number` |
+-   customers
+-   plans
+-   billing_accounts
+-   devices
+-   support_tickets
+-   chat_sessions
+-   chat_messages
+-   knowledge_chunks
 
-### Flow Architecture
+`knowledge_chunks` stores textual metadata while vector embeddings are
+stored in Vertex AI Vector Search.
 
-```
-Default Start Flow
-    │
-    ├── billing.inquiry / billing.dispute ──► Billing Flow
-    │       ├── Page: Account Verification (slot fill: account_number)
-    │       └── Page: Billing Resolution (webhook: billing_inquiry)
-    │
-    ├── network.issue / signal_problem ──► Network Flow
-    │       ├── Page: Collect Network Info (slot fill: zip_code)
-    │       └── Page: Network Troubleshooting (webhook: network_issue)
-    │
-    ├── plan.upgrade / plan.inquiry ──► Plan Flow
-    │       └── Page: Plan Comparison (webhook: plan_inquiry)
-    │
-    ├── ticket.status ──► Ticket Flow
-    │       └── Page: Ticket Lookup (slot fill: ticket_id)
-    │
-    └── escalation.request ──► Escalation Flow
-            ├── Page: Assess Escalation (webhook: escalation_request)
-            └── Page: Live Agent Handoff
-```
+------------------------------------------------------------------------
 
-### Slot Filling Example
+# Technology Stack
 
-For network issues, Dialogflow CX collects `zip_code` through multi-turn slot filling before invoking the webhook, ensuring the backend has all parameters needed for outage lookups.
+  Category       Technology
+  -------------- -------------------------
+  Language       Python 3.12
+  Backend        FastAPI
+  LLM            Gemini 2.5 Flash
+  Embeddings     gemini-embedding-001
+  Retrieval      Vertex AI Vector Search
+  Database       AlloyDB for PostgreSQL
+  Conversation   Dialogflow CX
+  Cloud          Google Cloud
+  Containers     Docker
 
----
+------------------------------------------------------------------------
 
-## RAG Pipeline
+# API Overview
 
-```
-1. User query arrives at /chat or /webhook
-2. Intent classification determines topic category
-3. Category-filtered semantic search against ChromaDB
-   (text-embedding-004 embeddings, cosine similarity)
-4. Top-4 chunks retrieved with relevance scores
-5. Chunks injected into Gemini prompt template with:
-   - Knowledge base context
-   - Conversation history (last 10 turns)
-   - Intent classification
-   - System persona (Nova)
-6. Gemini 2.5 Flash generates grounded response
-7. Response returned with source attribution
-```
+Core responsibilities include:
 
-**Embedding Model**: `text-embedding-004` (768 dimensions)
-**Vector Store**: ChromaDB (persistent, cosine similarity)
-**Generation Model**: Gemini 2.5 Flash
-**Chunk Size**: 600 words with 100-word overlap
+-   Customer chat endpoint
+-   Health endpoint
+-   Agent orchestration
+-   Knowledge retrieval
+-   Billing and account access
 
----
+------------------------------------------------------------------------
 
-## Google ADK Agents
+# Configuration
 
-Each ADK agent has specialized tools:
+Populate `.env` from `.env.example` and configure:
 
-### Support Agent
-- `check_account_status` — Account status, plan, balance
-- `get_ticket_status` — Ticket lookup by ID
-- `get_data_usage` — Current cycle data consumption
-- `create_support_ticket` — New ticket creation
+-   GOOGLE_CLOUD_PROJECT
+-   GOOGLE_CLOUD_LOCATION
+-   DATABASE_URL
+-   GEMINI_MODEL
+-   DIALOGFLOW_AGENT_ID
+-   VERTEX_INDEX_ID
+-   VERTEX_INDEX_ENDPOINT_ID
+-   VERTEX_DEPLOYED_INDEX_ID
+-   GCS_BUCKET_NAME
 
-### Billing Agent
-- `get_billing_details` — Itemized bill breakdown
-- `apply_billing_credit` — Goodwill credit (up to $50)
-- `check_payment_history` — Recent payment records
+------------------------------------------------------------------------
 
-### Network Agent
-- `check_network_status` — ZIP-code outage lookup
-- `run_remote_diagnostic` — Line-level signal/SIM diagnostics
-- `provision_network_reset` — Remote provisioning reset
+# Local Development
 
-### Escalation Agent
-- `assess_escalation_priority` — Priority scoring + tier recommendation
-- `initiate_human_handoff` — Context-aware transfer with case ID
-- `apply_goodwill_gesture` — Credits, data bonus, or free month
+``` bash
+git clone <repository-url>
+cd TeleNova
 
----
+python -m venv .venv
+source .venv/bin/activate
 
-## Observability
+pip install -r requirements.txt
 
-Every request returns structured telemetry:
-
-```json
-{
-  "observability": {
-    "request_id": "550e8400-e29b-41d4-a716-446655440000",
-    "session_id": "d290f1ee-6c54-4b01-90e6-d701748f0851",
-    "intent": "billing_inquiry",
-    "latency_ms": 487.3,
-    "token_count_input": 842,
-    "token_count_output": 156,
-    "total_tokens": 998,
-    "estimated_cost_usd": 0.000110
-  }
-}
-```
-
----
-
-## Local Development
-
-```bash
-# 1. Clone the repository
-git clone https://github.com/yourusername/telecom-support-ai.git
-cd telecom-support-ai
-
-# 2. Set up credentials
 cp .env.example .env
-# Edit .env with your GCP project ID and API keys
 
-# 3. Run setup script
-chmod +x deployment/setup_local.sh
-./deployment/setup_local.sh
-
-# 4. Start the server
-source venv/bin/activate
-python main.py
+uvicorn app.main:app --reload
 ```
 
-API docs available at: `http://localhost:8080/docs`
+------------------------------------------------------------------------
 
-### Test the API
+# Deployment
 
-```bash
-# Health check
-curl http://localhost:8080/health
+1.  Provision AlloyDB.
+2.  Provision Vertex AI Vector Search.
+3.  Create Dialogflow CX agent.
+4.  Configure Cloud Storage.
+5.  Build and deploy to Cloud Run.
+6.  Execute SQL migrations.
+7.  Load the knowledge base.
+8.  Validate end-to-end retrieval.
 
-# Start a conversation
-curl -X POST http://localhost:8080/chat \
-  -H "Content-Type: application/json" \
-  -d '{"message": "Why is my bill higher than usual this month?"}'
+------------------------------------------------------------------------
 
-# Continue with session context
-curl -X POST http://localhost:8080/chat \
-  -H "Content-Type: application/json" \
-  -d '{
-    "message": "Can you show me my usage breakdown?",
-    "session_id": "SESSION_ID_FROM_PREVIOUS_RESPONSE",
-    "account_number": "TN-100001"
-  }'
-```
+# Testing
 
----
+Recommended validation:
 
-## Cloud Run Deployment
+-   API health check
+-   Database connectivity
+-   Vector retrieval
+-   RAG grounding
+-   Multi-turn conversations
+-   Dialogflow webhook integration
 
-### Prerequisites
-- Google Cloud project with billing enabled
-- APIs enabled: Cloud Run, Artifact Registry, Cloud Storage, Vertex AI, Dialogflow CX
-- Service account with roles: `run.admin`, `storage.admin`, `aiplatform.user`, `dialogflow.admin`
+------------------------------------------------------------------------
 
-### Deploy
+# Roadmap
 
-```bash
-export GOOGLE_CLOUD_PROJECT=your-project-id
-export GOOGLE_CLOUD_LOCATION=us-central1
-chmod +x deployment/deploy.sh
-./deployment/deploy.sh
-```
+-   Hybrid lexical and semantic retrieval
+-   Streaming responses
+-   Evaluation pipeline
+-   Analytics dashboard
+-   Multi-region deployment
+-   Enhanced observability
 
-The script:
-1. Builds and pushes the Docker image to Google Container Registry
-2. Creates the GCS bucket and uploads knowledge base documents
-3. Deploys to Cloud Run with auto-scaling (1–10 instances)
-4. Outputs the service URL for Dialogflow CX webhook configuration
+------------------------------------------------------------------------
 
-### Configure Dialogflow CX Webhook
+# License
 
-After deployment, update your Dialogflow CX agent:
+MIT License
 
-1. Navigate to **Manage → Webhooks** in Dialogflow CX Console
-2. Create webhook: `https://YOUR_CLOUD_RUN_URL/webhook`
-3. Set timeout: 10 seconds
-4. Assign webhook to fulfillment in relevant flow pages
+------------------------------------------------------------------------
 
+# Author
 
+**Krishna Joshi**
