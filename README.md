@@ -1,6 +1,6 @@
 # TeleNova
 
-::: {align="center"}
+
 ## Enterprise AI-Powered Telecom Customer Support Platform on Google Cloud
 
 TeleNova is a cloud-native conversational AI platform that modernizes
